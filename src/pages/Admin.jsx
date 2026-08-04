@@ -425,10 +425,13 @@ export default function Admin() {
     <div className="admin-dashboard" style={{ display: 'block', background: 'var(--cream-dark)', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       {/* HEADER */}
       <header className="admin-header" style={{ background: 'var(--navy)', borderBottom: '2px solid var(--gold)', color: '#ffffff', padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 20px rgba(15,27,60,0.2)' }}>
-        <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '14px', fontWeight: 800, fontSize: '18px' }}>
-          <span style={{ color: 'var(--gold)', fontFamily: "'Playfair Display',serif", fontSize: '26px', lineHeight: 1 }}>आयाम</span>
-          <div style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.2)' }}></div>
-          <span style={{ letterSpacing: '-0.3px', fontFamily: "'Playfair Display',serif", fontSize: '19px' }}>AAYAM Admin Portal</span>
+        <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '6px 16px', borderRadius: '30px' }}>
+          <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '28px', objectFit: 'contain' }} />
+          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
+          <img src="/uit_logo.png" alt="UIT" style={{ height: '22px', objectFit: 'contain' }} />
+          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
+          <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '32px', width: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C5A059' }} />
+          <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--navy)', fontFamily: "'Playfair Display', serif", marginLeft: '4px' }}>Admin Portal</span>
         </div>
         <div className="admin-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Link to="/" className="btn-navy-pill" style={{ padding: '8px 18px', fontSize: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '30px', color: '#fff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease' }}>

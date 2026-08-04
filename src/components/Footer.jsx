@@ -6,10 +6,19 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <div className="nav-brand">
-            <span className="uit-text" style={{ color: '#fff' }}>UIT</span>
-            <div className="nav-divider" style={{ background: 'rgba(255,255,255,0.2)' }}></div>
-            <img src="/aayam_logo.png" alt="AAYAM" className="aayam-badge" onError={(e) => { e.target.style.display = 'none'; }} />
+          <div className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#ffffff', padding: '8px 16px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+            {/* Karnavati University Logo */}
+            <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '34px', objectFit: 'contain' }} />
+
+            <div style={{ height: '22px', width: '1px', background: '#cbd5e1' }}></div>
+
+            {/* UIT Logo */}
+            <img src="/uit_logo.png" alt="UIT" style={{ height: '26px', objectFit: 'contain' }} />
+
+            <div style={{ height: '22px', width: '1px', background: '#cbd5e1' }}></div>
+
+            {/* AAYAM Logo */}
+            <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C5A059' }} />
           </div>
           <p>AAYAM UIT Student Committee — Building Leaders, Creating Impact.</p>
           <div className="footer-socials">

@@ -50,23 +50,12 @@ export default function Signup() {
       <div className="auth-bg-overlay"></div>
 
       <header className="auth-header-nav">
-        <Link to="/" className="nav-brand">
-          <div className="ku-brand-wrap">
-            <svg className="ku-flame-icon" viewBox="0 0 36 36" fill="none" width="28" height="28">
-              <path d="M18 2C18 2 26 10 26 17C26 22.5228 22.4183 27 18 27C13.5817 27 10 22.5228 10 17C10 10 18 2 18 2Z" fill="#C8232C"/>
-              <path d="M18 8C18 8 22.5 13.5 22.5 18C22.5 21.3137 20.4853 24 18 24C15.5147 24 13.5 21.3137 13.5 18C13.5 13.5 18 8 18 8Z" fill="#F59E0B"/>
-            </svg>
-            <div className="ku-text" style={{ color: '#fff' }}>
-              <span className="ku-title" style={{ color: '#fff' }}>KARNAVATI</span>
-              <span className="ku-sub" style={{ color: 'rgba(255,255,255,0.7)' }}>UNIVERSITY</span>
-            </div>
-          </div>
-          <div className="nav-divider" style={{ background: 'rgba(255,255,255,0.2)' }}></div>
-          <span className="uit-text" style={{ color: '#fff' }}>UIT</span>
-          <div className="nav-divider" style={{ background: 'rgba(255,255,255,0.2)' }}></div>
-          <div className="aayam-badge-gold">
-            <span>आयाम</span>
-          </div>
+        <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '6px 14px', borderRadius: '12px', textDecoration: 'none' }}>
+          <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '30px', objectFit: 'contain' }} />
+          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
+          <img src="/uit_logo.png" alt="UIT" style={{ height: '24px', objectFit: 'contain' }} />
+          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
+          <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '32px', width: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C5A059' }} />
         </Link>
 
         <Link to="/" style={{ color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>

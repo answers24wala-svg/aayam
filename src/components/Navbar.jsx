@@ -33,35 +33,38 @@ export default function Navbar() {
     <>
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="mainNav">
         <div className="nav-inner">
-          <Link to="/" className="nav-brand">
-            <div className="ku-brand-wrap">
-              <svg className="ku-flame-icon" viewBox="0 0 36 36" fill="none">
-                <path d="M18 2C18 2 26 10 26 17C26 22.5228 22.4183 27 18 27C13.5817 27 10 22.5228 10 17C10 10 18 2 18 2Z" fill="url(#flameGrad1)"/>
-                <path d="M18 8C18 8 22.5 13.5 22.5 18C22.5 21.3137 20.4853 24 18 24C15.5147 24 13.5 21.3137 13.5 18C13.5 13.5 18 8 18 8Z" fill="url(#flameGrad2)"/>
-                <defs>
-                  <linearGradient id="flameGrad1" x1="18" y1="2" x2="18" y2="27" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#C8232C"/>
-                    <stop offset="1" stopColor="#D97706"/>
-                  </linearGradient>
-                  <linearGradient id="flameGrad2" x1="18" y1="8" x2="18" y2="24" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#F59E0B"/>
-                    <stop offset="1" stopColor="#FCD34D"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="ku-text">
-                <span className="ku-title">KARNAVATI</span>
-                <span className="ku-sub">UNIVERSITY</span>
-              </div>
-            </div>
+          <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+            {/* 3rd image: Karnavati University NAAC A+ Logo */}
+            <img
+              src="/karnavati_logo.png"
+              alt="Karnavati University"
+              style={{ height: '38px', objectFit: 'contain', background: '#ffffff', padding: '4px 8px', borderRadius: '8px' }}
+            />
 
-            <div className="nav-divider"></div>
-            <span className="uit-text">UIT</span>
-            <div className="nav-divider"></div>
+            <div className="nav-divider" style={{ opacity: 0.4 }}></div>
 
-            <div className="aayam-badge-gold">
-              <span>आयाम</span>
-            </div>
+            {/* 2nd image: UIT Logo */}
+            <img
+              src="/uit_logo.png"
+              alt="UIT"
+              style={{ height: '30px', objectFit: 'contain', background: '#ffffff', padding: '3px 8px', borderRadius: '6px' }}
+            />
+
+            <div className="nav-divider" style={{ opacity: 0.4 }}></div>
+
+            {/* 1st image: AAYAM Logo */}
+            <img
+              src="/aayam_logo.png"
+              alt="AAYAM"
+              style={{
+                height: '42px',
+                width: '42px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '2px solid #C5A059',
+                boxShadow: '0 2px 8px rgba(197, 160, 89, 0.3)'
+              }}
+            />
           </Link>
 
           <div className="nav-links">
