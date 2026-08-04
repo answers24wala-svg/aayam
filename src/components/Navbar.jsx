@@ -33,36 +33,50 @@ export default function Navbar() {
     <>
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="mainNav">
         <div className="nav-inner">
-          <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+          <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>
             {/* 3rd image: Karnavati University NAAC A+ Logo */}
             <img
               src="/karnavati_logo.png"
               alt="Karnavati University"
-              style={{ height: '38px', objectFit: 'contain', background: '#ffffff', padding: '4px 8px', borderRadius: '8px' }}
+              style={{
+                height: '48px',
+                objectFit: 'contain',
+                background: '#ffffff',
+                padding: '5px 12px',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+              }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4 }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '28px' }}></div>
 
             {/* 2nd image: UIT Logo */}
             <img
               src="/uit_logo.png"
               alt="UIT"
-              style={{ height: '30px', objectFit: 'contain', background: '#ffffff', padding: '3px 8px', borderRadius: '6px' }}
+              style={{
+                height: '38px',
+                objectFit: 'contain',
+                background: '#ffffff',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+              }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4 }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '28px' }}></div>
 
             {/* 1st image: AAYAM Logo */}
             <img
               src="/aayam_logo.png"
               alt="AAYAM"
               style={{
-                height: '42px',
-                width: '42px',
+                height: '54px',
+                width: '54px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: '2px solid #C5A059',
-                boxShadow: '0 2px 8px rgba(197, 160, 89, 0.3)'
+                border: '2.5px solid #C5A059',
+                boxShadow: '0 3px 12px rgba(197, 160, 89, 0.4)'
               }}
             />
           </Link>
