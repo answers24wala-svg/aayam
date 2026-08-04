@@ -15,8 +15,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-// Helper for promise-based queries
-const dbRun = (sql, params = []) => {
+// Low-level query helpers
+const dbRunCore = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
       if (err) reject(err);
@@ -25,7 +25,7 @@ const dbRun = (sql, params = []) => {
   });
 };
 
-const dbAll = (sql, params = []) => {
+const dbAllCore = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (err, rows) => {
       if (err) reject(err);
@@ -34,7 +34,7 @@ const dbAll = (sql, params = []) => {
   });
 };
 
-const dbGet = (sql, params = []) => {
+const dbGetCore = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     db.get(sql, params, (err, row) => {
       if (err) reject(err);
@@ -43,11 +43,35 @@ const dbGet = (sql, params = []) => {
   });
 };
 
+let initPromise = null;
+const ensureDbInitialized = () => {
+  if (!initPromise) {
+    initPromise = initDb();
+  }
+  return initPromise;
+};
+
+// Safe public query helpers (automatically awaits initialization before executing query)
+const dbRun = async (sql, params = []) => {
+  await ensureDbInitialized();
+  return dbRunCore(sql, params);
+};
+
+const dbAll = async (sql, params = []) => {
+  await ensureDbInitialized();
+  return dbAllCore(sql, params);
+};
+
+const dbGet = async (sql, params = []) => {
+  await ensureDbInitialized();
+  return dbGetCore(sql, params);
+};
+
 // Initialize Database Tables
 const initDb = async () => {
   try {
     // 1. Contact Messages Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS contact_messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -60,7 +84,7 @@ const initDb = async () => {
     `);
 
     // 2. Events Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS events (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -87,14 +111,14 @@ const initDb = async () => {
     ];
     for (const col of newColumns) {
       try {
-        await dbRun(`ALTER TABLE events ADD COLUMN ${col} TEXT`);
+        await dbRunCore(`ALTER TABLE events ADD COLUMN ${col} TEXT`);
       } catch (e) {
         // Column already exists, ignore error
       }
     }
 
     // 3. Event Registrations Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS event_registrations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         event_id INTEGER NOT NULL,
@@ -112,13 +136,13 @@ const initDb = async () => {
     `);
 
     try {
-      await dbRun(`ALTER TABLE event_registrations ADD COLUMN custom_responses TEXT`);
+      await dbRunCore(`ALTER TABLE event_registrations ADD COLUMN custom_responses TEXT`);
     } catch (e) {
       // Column already exists, ignore error
     }
 
     // 4. Admin Users Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS admins (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
@@ -131,13 +155,13 @@ const initDb = async () => {
 
     // Migration: Add email column if table was created previously without email
     try {
-      await dbRun(`ALTER TABLE admins ADD COLUMN email TEXT`);
+      await dbRunCore(`ALTER TABLE admins ADD COLUMN email TEXT`);
     } catch (e) {
       // Column already exists, ignore error
     }
 
     // 5. Students Users Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -151,10 +175,10 @@ const initDb = async () => {
     `);
 
     // Seed Default Admin (username: admin, password: adminpassword123)
-    const existingAdmin = await dbGet(`SELECT * FROM admins WHERE username = ?`, ['admin']);
+    const existingAdmin = await dbGetCore(`SELECT * FROM admins WHERE username = ?`, ['admin']);
     if (!existingAdmin) {
       const passwordHash = await bcrypt.hash('adminpassword123', 10);
-      await dbRun(
+      await dbRunCore(
         `INSERT INTO admins (username, email, password_hash, name) VALUES (?, ?, ?, ?)`,
         ['admin', 'admin@ku.edu.in', passwordHash, 'AAYAM Administrator']
       );
@@ -162,7 +186,7 @@ const initDb = async () => {
     }
 
     // Seed Default Events if empty
-    const existingEvents = await dbAll(`SELECT COUNT(*) as count FROM events`);
+    const existingEvents = await dbAllCore(`SELECT COUNT(*) as count FROM events`);
     if (existingEvents[0].count === 0) {
       const initialEvents = [
         {
@@ -218,7 +242,7 @@ const initDb = async () => {
       ];
 
       for (const event of initialEvents) {
-        await dbRun(
+        await dbRunCore(
           `INSERT INTO events (title, subtitle, category, date_str, location, description, image, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [event.title, event.subtitle, event.category, event.date_str, event.location, event.description, event.image, event.status]
         );
@@ -227,7 +251,7 @@ const initDb = async () => {
     }
 
     // 6. Team Members Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS team_members (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -248,14 +272,14 @@ const initDb = async () => {
     const newTeamCols = ['linkedin_url', 'email'];
     for (const col of newTeamCols) {
       try {
-        await dbRun(`ALTER TABLE team_members ADD COLUMN ${col} TEXT`);
+        await dbRunCore(`ALTER TABLE team_members ADD COLUMN ${col} TEXT`);
       } catch (e) {
         // Column already exists, ignore error
       }
     }
 
     // Seed Team Members if empty
-    const existingTeam = await dbAll(`SELECT COUNT(*) as count FROM team_members`);
+    const existingTeam = await dbAllCore(`SELECT COUNT(*) as count FROM team_members`);
     if (existingTeam[0].count === 0) {
       const initialTeam = [
         { name: 'Dr. Suresh Patel', role: 'Patron & Principal', category: 'Head', branch_title: 'Head', description: 'Guiding AAYAM with visionary leadership and unwavering support for student empowerment.', icon: '👤', image: '', display_order: 1 },
@@ -275,7 +299,7 @@ const initDb = async () => {
       ];
 
       for (const m of initialTeam) {
-        await dbRun(
+        await dbRunCore(
           `INSERT INTO team_members (name, role, category, branch_title, description, icon, image, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [m.name, m.role, m.category, m.branch_title, m.description, m.icon, m.image, m.display_order]
         );
@@ -284,7 +308,7 @@ const initDb = async () => {
     }
 
     // 7. Gallery Images Table
-    await dbRun(`
+    await dbRunCore(`
       CREATE TABLE IF NOT EXISTS gallery_images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -296,7 +320,7 @@ const initDb = async () => {
     `);
 
     // Seed Gallery Images if empty
-    const existingGallery = await dbAll(`SELECT COUNT(*) as count FROM gallery_images`);
+    const existingGallery = await dbAllCore(`SELECT COUNT(*) as count FROM gallery_images`);
     if (existingGallery[0].count === 0) {
       const initialGallery = [
         { title: 'Equinox 3.0 Tech Symposium', category: 'Technical', image: '/equinox_event.png', display_order: 1 },
@@ -308,7 +332,7 @@ const initDb = async () => {
       ];
 
       for (const item of initialGallery) {
-        await dbRun(
+        await dbRunCore(
           `INSERT INTO gallery_images (title, category, image, display_order) VALUES (?, ?, ?, ?)`,
           [item.title, item.category, item.image, item.display_order]
         );
