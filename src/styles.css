@@ -51,17 +51,17 @@ button { cursor: pointer; font-family: inherit; }
    ============================================= */
 .navbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(250,246,240,0.96);
+  background: rgba(250,246,240,0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 36px;
-  height: 82px;
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 28px;
+  height: 108px;
   display: flex; align-items: center;
   transition: var(--transition);
 }
 .navbar.scrolled {
-  height: 76px;
+  height: 94px;
   box-shadow: var(--shadow-md);
 }
 .nav-inner {

@@ -33,50 +33,50 @@ export default function Navbar() {
     <>
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="mainNav">
         <div className="nav-inner">
-          <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>
+          <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '16px', textDecoration: 'none' }}>
             {/* 3rd image: Karnavati University NAAC A+ Logo */}
             <img
               src="/karnavati_logo.png"
               alt="Karnavati University"
               style={{
-                height: '48px',
+                height: '66px',
                 objectFit: 'contain',
                 background: '#ffffff',
-                padding: '5px 12px',
-                borderRadius: '10px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                padding: '6px 14px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
               }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4, height: '28px' }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '36px' }}></div>
 
             {/* 2nd image: UIT Logo */}
             <img
               src="/uit_logo.png"
               alt="UIT"
               style={{
-                height: '38px',
+                height: '52px',
                 objectFit: 'contain',
                 background: '#ffffff',
-                padding: '4px 10px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                padding: '5px 12px',
+                borderRadius: '10px',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
               }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4, height: '28px' }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '36px' }}></div>
 
             {/* 1st image: AAYAM Logo */}
             <img
               src="/aayam_logo.png"
               alt="AAYAM"
               style={{
-                height: '54px',
-                width: '54px',
+                height: '72px',
+                width: '72px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: '2.5px solid #C5A059',
-                boxShadow: '0 3px 12px rgba(197, 160, 89, 0.4)'
+                border: '3px solid #C5A059',
+                boxShadow: '0 4px 16px rgba(197, 160, 89, 0.5)'
               }}
             />
           </Link>
