@@ -741,16 +741,25 @@ button { cursor: pointer; font-family: inherit; }
 .lightbox-close:hover { opacity: 1; transform: rotate(90deg); }
 
 /* =============================================
-   RESPONSIVE
+   RESPONSIVE (LAPTOPS, TABLETS & MOBILE PHONES)
    ============================================= */
 @media (max-width: 1100px) {
-  .branches-grid { grid-template-columns: repeat(4, 1fr); }
+  .branches-grid { grid-template-columns: repeat(3, 1fr); }
   .core-committee-grid { grid-template-columns: repeat(3, 1fr); }
   .gallery-grid { grid-template-columns: repeat(3, 1fr); }
   .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
 }
+
 @media (max-width: 900px) {
-  .navbar { padding: 0 20px; }
+  .navbar { height: 86px; padding: 0 18px; }
+  .navbar.scrolled { height: 78px; }
+  .mobile-menu { top: 86px; background: rgba(250,246,240,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .nav-brand img[alt="Karnavati University"] { height: 42px !important; padding: 4px 8px !important; }
+  .nav-brand img[alt="UIT"] { height: 32px !important; padding: 3px 6px !important; }
+  .nav-brand img[alt="AAYAM"] { height: 46px !important; width: 46px !important; }
+  .nav-brand { gap: 10px !important; }
+  .nav-divider { height: 24px !important; }
+
   .nav-links, .nav-cta { display: none; }
   .hamburger { display: flex; }
   .hero-inner { grid-template-columns: 1fr; text-align: center; }
@@ -769,23 +778,44 @@ button { cursor: pointer; font-family: inherit; }
   .team-cta { flex-direction: column; gap: 24px; text-align: center; }
   .team-cta-left { flex-direction: column; }
 }
+
 @media (max-width: 640px) {
-  .hero-inner { padding: 40px 20px; }
-  .about-home, .events-section, .branches-section, .page-hero, .about-mission, .team-committee, .gallery-section, .join-section, .contact-section { padding-left: 20px; padding-right: 20px; }
+  .navbar { height: 76px; padding: 0 12px; }
+  .navbar.scrolled { height: 70px; }
+  .mobile-menu { top: 76px; padding: 16px; }
+  .nav-brand img[alt="Karnavati University"] { height: 34px !important; padding: 3px 6px !important; border-radius: 6px !important; }
+  .nav-brand img[alt="UIT"] { height: 26px !important; padding: 2px 5px !important; border-radius: 5px !important; }
+  .nav-brand img[alt="AAYAM"] { height: 38px !important; width: 38px !important; }
+  .nav-brand { gap: 6px !important; }
+  .nav-divider { height: 18px !important; }
+
+  .hero-inner { padding: 36px 16px; }
+  .about-home, .events-section, .branches-section, .page-hero, .about-mission, .team-committee, .gallery-section, .join-section, .contact-section { padding-left: 16px; padding-right: 16px; }
   .events-grid, .events-grid-2, .events-cards-row { grid-template-columns: 1fr; }
   .branches-grid { grid-template-columns: repeat(2, 1fr); }
   .core-committee-grid { grid-template-columns: repeat(2, 1fr); }
-  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-grid { grid-template-columns: repeat(1, 1fr); }
   .gallery-item.wide { grid-column: span 1; }
-  .footer-inner { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; gap: 24px; }
   .form-grid { grid-template-columns: 1fr; }
   .form-group.full { grid-column: span 1; }
   .branch-select-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-inner { grid-template-columns: 1fr 1fr; }
-  .footer { padding: 40px 20px 0; }
+  .footer { padding: 36px 16px 0; }
   .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
-  .contact-section { padding-left: 20px; padding-right: 20px; }
-  .join-form-wrap { padding: 28px 20px; }
+  .contact-section { padding-left: 16px; padding-right: 16px; }
+  .join-form-wrap { padding: 24px 16px; }
+}
+
+@media (max-width: 480px) {
+  body { overflow-x: hidden; }
+  .nav-brand img[alt="Karnavati University"] { height: 28px !important; padding: 2px 4px !important; }
+  .nav-brand img[alt="UIT"] { height: 22px !important; padding: 2px 4px !important; }
+  .nav-brand img[alt="AAYAM"] { height: 34px !important; width: 34px !important; }
+  .nav-brand { gap: 5px !important; }
+  .branches-grid { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: 1fr; }
+  .footer-brand .nav-brand { flex-wrap: wrap; justify-content: center; }
 }
 
 /* =============================================
