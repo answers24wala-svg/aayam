@@ -768,13 +768,17 @@ app.get('*', (req, res, next) => {
   next();
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`AAYAM UIT React & Backend Server is running!`);
-  console.log(`URL: http://localhost:${PORT}`);
-  console.log(`React App Routes: /, /events, /team, /gallery, /contact`);
-  console.log(`Auth Routes: /login, /signup`);
-  console.log(`Admin Portal: /admin`);
-  console.log(`====================================================`);
-});
+// Start Server (Only when run directly, not in Vercel serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`AAYAM UIT React & Backend Server is running!`);
+    console.log(`URL: http://localhost:${PORT}`);
+    console.log(`React App Routes: /, /events, /team, /gallery, /contact`);
+    console.log(`Auth Routes: /login, /signup`);
+    console.log(`Admin Portal: /admin`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;
