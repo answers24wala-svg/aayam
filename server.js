@@ -1,0 +1,780 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { dbRun, dbAll, dbGet } = require('./db');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'aayam_uit_secret_key_2026_secure';
+const ADMIN_PASSCODE = 'aayam2026admin'; // Secret code required for Admin self-registration
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve static frontend assets & React build
+const fs = require('fs');
+const distPath = path.join(__dirname, 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
+app.use(express.static(__dirname));
+
+// ---- AUTH MIDDLEWARE ----
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, error: 'Unauthorized. Token required.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Invalid or expired token.' });
+  }
+};
+
+const authAdmin = (req, res, next) => {
+  authMiddleware(req, res, () => {
+    if (req.user && req.user.role === 'admin') {
+      req.admin = req.user;
+      next();
+    } else {
+      res.status(403).json({ success: false, error: 'Access denied. Admin role required.' });
+    }
+  });
+};
+
+// ==========================================
+// AUTHENTICATION API ENDPOINTS
+// ==========================================
+
+// 1. Student Signup
+app.post('/api/auth/student/signup', async (req, res) => {
+  try {
+    const { name, email, password, roll_number, branch, year } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, error: 'Name, email, and password are required.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+    }
+
+    const existingStudent = await dbGet(`SELECT * FROM students WHERE email = ?`, [email.trim().toLowerCase()]);
+    if (existingStudent) {
+      return res.status(400).json({ success: false, error: 'An account with this email already exists.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await dbRun(
+      `INSERT INTO students (name, email, password_hash, roll_number, branch, year) VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        name.trim(),
+        email.trim().toLowerCase(),
+        passwordHash,
+        roll_number ? roll_number.trim() : '',
+        branch ? branch.trim() : '',
+        year ? year.trim() : ''
+      ]
+    );
+
+    const token = jwt.sign(
+      { id: result.lastID, name: name.trim(), email: email.trim().toLowerCase(), role: 'student', roll_number, branch, year },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully! Welcome to AAYAM.',
+      token,
+      user: {
+        id: result.lastID,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        roll_number,
+        branch,
+        year,
+        role: 'student'
+      }
+    });
+  } catch (err) {
+    console.error('Error during student signup:', err);
+    res.status(500).json({ success: false, error: 'Failed to create student account.' });
+  }
+});
+
+// 2. Student Login
+app.post('/api/auth/student/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Email and password are required.' });
+    }
+
+    const student = await dbGet(`SELECT * FROM students WHERE email = ?`, [email.trim().toLowerCase()]);
+    if (!student) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, student.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
+    const token = jwt.sign(
+      { id: student.id, name: student.name, email: student.email, role: 'student', roll_number: student.roll_number, branch: student.branch, year: student.year },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      message: `Welcome back, ${student.name}!`,
+      token,
+      user: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        roll_number: student.roll_number,
+        branch: student.branch,
+        year: student.year,
+        role: 'student'
+      }
+    });
+  } catch (err) {
+    console.error('Error during student login:', err);
+    res.status(500).json({ success: false, error: 'Failed to log in.' });
+  }
+});
+
+// 3. Admin Signup
+app.post('/api/auth/admin/signup', async (req, res) => {
+  try {
+    const { name, username, email, password, secret_code } = req.body;
+
+    if (!name || !username || !password || !secret_code) {
+      return res.status(400).json({ success: false, error: 'Name, username, password, and admin secret code are required.' });
+    }
+
+    if (secret_code !== ADMIN_PASSCODE) {
+      return res.status(403).json({ success: false, error: 'Invalid Admin Security Code.' });
+    }
+
+    const existingAdmin = await dbGet(`SELECT * FROM admins WHERE username = ? OR email = ?`, [username.trim(), (email || '').trim().toLowerCase()]);
+    if (existingAdmin) {
+      return res.status(400).json({ success: false, error: 'Username or email already exists.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await dbRun(
+      `INSERT INTO admins (username, email, password_hash, name) VALUES (?, ?, ?, ?)`,
+      [username.trim(), (email || '').trim().toLowerCase(), passwordHash, name.trim()]
+    );
+
+    const token = jwt.sign(
+      { id: result.lastID, username: username.trim(), name: name.trim(), role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Admin account created successfully!',
+      token,
+      user: {
+        id: result.lastID,
+        username: username.trim(),
+        name: name.trim(),
+        role: 'admin'
+      }
+    });
+  } catch (err) {
+    console.error('Error during admin signup:', err);
+    res.status(500).json({ success: false, error: 'Failed to create admin account.' });
+  }
+});
+
+// 4. Admin Login
+app.post('/api/auth/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Username/email and password are required.' });
+    }
+
+    const input = username.trim();
+    const admin = await dbGet(`SELECT * FROM admins WHERE username = ? OR email = ?`, [input, input.toLowerCase()]);
+    if (!admin) {
+      return res.status(401).json({ success: false, error: 'Invalid username/email or password.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Invalid username/email or password.' });
+    }
+
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username, name: admin.name, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: { id: admin.id, username: admin.username, name: admin.name, role: 'admin' }
+    });
+  } catch (err) {
+    console.error('Error logging in admin:', err);
+    res.status(500).json({ success: false, error: 'Failed to process login.' });
+  }
+});
+
+// Unified Universal Login (Handles both Students and Admins automatically)
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, username, password } = req.body;
+    const input = (email || username || '').trim();
+
+    if (!input || !password) {
+      return res.status(400).json({ success: false, error: 'Email/Username and password are required.' });
+    }
+
+    // 1. Check Student Table
+    const student = await dbGet(`SELECT * FROM students WHERE email = ?`, [input.toLowerCase()]);
+    if (student) {
+      const isMatch = await bcrypt.compare(password, student.password_hash);
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: student.id, name: student.name, email: student.email, role: 'student', roll_number: student.roll_number, branch: student.branch, year: student.year },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+        return res.json({
+          success: true,
+          message: `Welcome back, ${student.name}!`,
+          token,
+          user: {
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            roll_number: student.roll_number,
+            branch: student.branch,
+            year: student.year,
+            role: 'student'
+          }
+        });
+      }
+    }
+
+    // 2. Check Admin Table
+    const admin = await dbGet(`SELECT * FROM admins WHERE username = ? OR email = ?`, [input, input.toLowerCase()]);
+    if (admin) {
+      const isMatch = await bcrypt.compare(password, admin.password_hash);
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: admin.id, username: admin.username, name: admin.name, role: 'admin' },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        return res.json({
+          success: true,
+          message: `Welcome back, ${admin.name}!`,
+          token,
+          user: { id: admin.id, username: admin.username, name: admin.name, role: 'admin' }
+        });
+      }
+    }
+
+    return res.status(401).json({ success: false, error: 'Invalid Email/Username or Password.' });
+  } catch (err) {
+    console.error('Error during unified login:', err);
+    res.status(500).json({ success: false, error: 'Failed to process login.' });
+  }
+});
+
+// 5. Get Current User Info (/api/auth/me)
+app.get('/api/auth/me', authMiddleware, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
+
+// ==========================================
+// PUBLIC API ENDPOINTS
+// ==========================================
+
+// Submit Contact Form Message
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, error: 'All fields (name, email, subject, message) are required.' });
+    }
+
+    const result = await dbRun(
+      `INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)`,
+      [name.trim(), email.trim(), subject.trim(), message.trim()]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Your message has been received! We will get back to you soon.',
+      id: result.lastID
+    });
+  } catch (err) {
+    console.error('Error handling contact submit:', err);
+    res.status(500).json({ success: false, error: 'Internal server error processing message.' });
+  }
+});
+
+// Get Events List (Filterable)
+app.get('/api/events', async (req, res) => {
+  try {
+    const { category, status } = req.query;
+    let query = 'SELECT * FROM events WHERE 1=1';
+    const params = [];
+
+    if (category && category !== 'all') {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY id DESC';
+    const events = await dbAll(query, params);
+
+    res.json({ success: true, count: events.length, events });
+  } catch (err) {
+    console.error('Error fetching events:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch events.' });
+  }
+});
+
+// Get Single Event Details
+app.get('/api/events/:id', async (req, res) => {
+  try {
+    const event = await dbGet(`SELECT * FROM events WHERE id = ?`, [req.params.id]);
+    if (!event) {
+      return res.status(404).json({ success: false, error: 'Event not found.' });
+    }
+    res.json({ success: true, event });
+  } catch (err) {
+    console.error('Error fetching event details:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch event details.' });
+  }
+});
+
+// Register Student for an Event
+app.post('/api/events/register', async (req, res) => {
+  try {
+    const {
+      event_id, event_title, student_name, student_email, phone, roll_number, branch, year, custom_responses
+    } = req.body;
+
+    if (!event_id || !student_name || !student_email || !phone || !roll_number || !branch || !year) {
+      return res.status(400).json({ success: false, error: 'All standard registration fields are required.' });
+    }
+
+    const event = await dbGet(`SELECT * FROM events WHERE id = ?`, [event_id]);
+    if (!event) {
+      return res.status(404).json({ success: false, error: 'Event not found.' });
+    }
+
+    const existing = await dbGet(
+      `SELECT * FROM event_registrations WHERE event_id = ? AND (student_email = ? OR roll_number = ?)`,
+      [event_id, student_email.trim(), roll_number.trim()]
+    );
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        error: 'You have already registered for this event with this email or roll number.'
+      });
+    }
+
+    const titleToSave = event_title || event.title;
+    const customResponsesStr = typeof custom_responses === 'object' ? JSON.stringify(custom_responses) : (custom_responses || '');
+
+    const result = await dbRun(
+      `INSERT INTO event_registrations (event_id, event_title, student_name, student_email, phone, roll_number, branch, year, custom_responses)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        event_id,
+        titleToSave,
+        student_name.trim(),
+        student_email.trim(),
+        phone.trim(),
+        roll_number.trim(),
+        branch.trim(),
+        year.trim(),
+        customResponsesStr
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully registered for ${titleToSave}!`,
+      registration_id: result.lastID
+    });
+  } catch (err) {
+    console.error('Error handling event registration:', err);
+    res.status(500).json({ success: false, error: 'Internal server error processing registration.' });
+  }
+});
+
+// ==========================================
+// ADMIN API ENDPOINTS (PROTECTED)
+// ==========================================
+
+// Admin Stats Overview
+app.get('/api/admin/stats', authAdmin, async (req, res) => {
+  try {
+    const messagesCount = await dbGet(`SELECT COUNT(*) as count FROM contact_messages`);
+    const unreadMessagesCount = await dbGet(`SELECT COUNT(*) as count FROM contact_messages WHERE status = 'unread'`);
+    const registrationsCount = await dbGet(`SELECT COUNT(*) as count FROM event_registrations`);
+    const eventsCount = await dbGet(`SELECT COUNT(*) as count FROM events`);
+    const studentsCount = await dbGet(`SELECT COUNT(*) as count FROM students`);
+
+    res.json({
+      success: true,
+      stats: {
+        total_messages: messagesCount.count,
+        unread_messages: unreadMessagesCount.count,
+        total_registrations: registrationsCount.count,
+        total_events: eventsCount.count,
+        total_students: studentsCount.count
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to load admin stats.' });
+  }
+});
+
+// Admin: Get All Messages
+app.get('/api/admin/messages', authAdmin, async (req, res) => {
+  try {
+    const messages = await dbAll(`SELECT * FROM contact_messages ORDER BY created_at DESC`);
+    res.json({ success: true, count: messages.length, messages });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to load messages.' });
+  }
+});
+
+// Admin: Mark Message Read
+app.patch('/api/admin/messages/:id/read', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`UPDATE contact_messages SET status = 'read' WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Message marked as read.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update message status.' });
+  }
+});
+
+// Admin: Delete Message
+app.delete('/api/admin/messages/:id', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`DELETE FROM contact_messages WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Message deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete message.' });
+  }
+});
+
+// Admin: Get All Event Registrations
+app.get('/api/admin/registrations', authAdmin, async (req, res) => {
+  try {
+    const { event_id } = req.query;
+    let query = 'SELECT * FROM event_registrations';
+    const params = [];
+
+    if (event_id) {
+      query += ' WHERE event_id = ?';
+      params.push(event_id);
+    }
+
+    query += ' ORDER BY created_at DESC';
+    const registrations = await dbAll(query, params);
+    res.json({ success: true, count: registrations.length, registrations });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to load registrations.' });
+  }
+});
+
+// Admin: Delete Registration
+app.delete('/api/admin/registrations/:id', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`DELETE FROM event_registrations WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Registration deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete registration.' });
+  }
+});
+
+// Admin: Create Event
+app.post('/api/admin/events', authAdmin, async (req, res) => {
+  try {
+    const {
+      title, subtitle, category, start_date, end_date, date_str, location,
+      short_description, full_description, about_event, description, image, status, custom_fields,
+      visibility, registration_link, slideshow_images, schedule_cards, sub_events
+    } = req.body;
+
+    if (!title || !category || !location) {
+      return res.status(400).json({ success: false, error: 'Title, category, and location are required.' });
+    }
+
+    const computedDateStr = date_str || (start_date && end_date ? `${start_date} to ${end_date}` : start_date || '');
+    const mainDescription = short_description || description || '';
+    const customFieldsStr = typeof custom_fields === 'object' ? JSON.stringify(custom_fields) : (custom_fields || '');
+    const slideshowStr = typeof slideshow_images === 'object' ? JSON.stringify(slideshow_images) : (slideshow_images || '');
+    const scheduleStr = typeof schedule_cards === 'object' ? JSON.stringify(schedule_cards) : (schedule_cards || '');
+    const subEventsStr = typeof sub_events === 'object' ? JSON.stringify(sub_events) : (sub_events || '');
+
+    const result = await dbRun(
+      `INSERT INTO events (
+        title, subtitle, category, date_str, start_date, end_date, location,
+        description, short_description, full_description, about_event, image, status, custom_fields,
+        visibility, registration_link, slideshow_images, schedule_cards, sub_events
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        title, subtitle || '', category, computedDateStr, start_date || '', end_date || '', location,
+        mainDescription, short_description || '', full_description || '', about_event || '', image || '', status || 'upcoming',
+        customFieldsStr, visibility || 'public', registration_link || '', slideshowStr, scheduleStr, subEventsStr
+      ]
+    );
+
+    res.status(201).json({ success: true, message: 'Event created successfully.', id: result.lastID });
+  } catch (err) {
+    console.error('Error creating event:', err);
+    res.status(500).json({ success: false, error: 'Failed to create event.' });
+  }
+});
+
+// Admin: Update Event
+app.put('/api/admin/events/:id', authAdmin, async (req, res) => {
+  try {
+    const {
+      title, subtitle, category, start_date, end_date, date_str, location,
+      short_description, full_description, about_event, description, image, status, custom_fields,
+      visibility, registration_link, slideshow_images, schedule_cards, sub_events
+    } = req.body;
+
+    if (!title || !category || !location) {
+      return res.status(400).json({ success: false, error: 'Title, category, and location are required.' });
+    }
+
+    const computedDateStr = date_str || (start_date && end_date ? `${start_date} to ${end_date}` : start_date || '');
+    const mainDescription = short_description || description || '';
+    const customFieldsStr = typeof custom_fields === 'object' ? JSON.stringify(custom_fields) : (custom_fields || '');
+    const slideshowStr = typeof slideshow_images === 'object' ? JSON.stringify(slideshow_images) : (slideshow_images || '');
+    const scheduleStr = typeof schedule_cards === 'object' ? JSON.stringify(schedule_cards) : (schedule_cards || '');
+    const subEventsStr = typeof sub_events === 'object' ? JSON.stringify(sub_events) : (sub_events || '');
+
+    await dbRun(
+      `UPDATE events SET
+        title = ?, subtitle = ?, category = ?, date_str = ?, start_date = ?, end_date = ?, location = ?,
+        description = ?, short_description = ?, full_description = ?, about_event = ?, image = ?, status = ?, custom_fields = ?,
+        visibility = ?, registration_link = ?, slideshow_images = ?, schedule_cards = ?, sub_events = ?
+       WHERE id = ?`,
+      [
+        title, subtitle || '', category, computedDateStr, start_date || '', end_date || '', location,
+        mainDescription, short_description || '', full_description || '', about_event || '', image || '', status || 'upcoming',
+        customFieldsStr, visibility || 'public', registration_link || '', slideshowStr, scheduleStr, subEventsStr,
+        req.params.id
+      ]
+    );
+
+    res.json({ success: true, message: 'Event updated successfully.' });
+  } catch (err) {
+    console.error('Error updating event:', err);
+    res.status(500).json({ success: false, error: 'Failed to update event.' });
+  }
+});
+
+// Public: Get Team Members
+app.get('/api/team', async (req, res) => {
+  try {
+    const team = await dbAll(`SELECT * FROM team_members ORDER BY display_order ASC, id ASC`);
+    const leadership = team.filter(m => m.category === 'leadership');
+    const branches = team.filter(m => m.category === 'branch_head');
+    res.json({ success: true, team, leadership, branches });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch team members.' });
+  }
+});
+
+// Admin: Get Team Members
+app.get('/api/admin/team', authAdmin, async (req, res) => {
+  try {
+    const team = await dbAll(`SELECT * FROM team_members ORDER BY display_order ASC, id ASC`);
+    res.json({ success: true, team });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch team members.' });
+  }
+});
+
+// Admin: Create Team Member
+app.post('/api/admin/team', authAdmin, async (req, res) => {
+  try {
+    const { name, role, category, branch_title, description, image, icon, linkedin_url, email, display_order } = req.body;
+    if (!name || !role) {
+      return res.status(400).json({ success: false, error: 'Name and role are required.' });
+    }
+
+    const result = await dbRun(
+      `INSERT INTO team_members (name, role, category, branch_title, description, image, icon, linkedin_url, email, display_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, role, category || 'Head', branch_title || '', description || '', image || '', icon || '👤', linkedin_url || '', email || '', display_order || 0]
+    );
+
+    res.status(201).json({ success: true, message: 'Team member created.', id: result.lastID });
+  } catch (err) {
+    console.error('Error creating team member:', err);
+    res.status(500).json({ success: false, error: 'Failed to create team member.' });
+  }
+});
+
+// Admin: Update Team Member
+app.put('/api/admin/team/:id', authAdmin, async (req, res) => {
+  try {
+    const { name, role, category, branch_title, description, image, icon, linkedin_url, email, display_order } = req.body;
+    if (!name || !role) {
+      return res.status(400).json({ success: false, error: 'Name and role are required.' });
+    }
+
+    await dbRun(
+      `UPDATE team_members SET name = ?, role = ?, category = ?, branch_title = ?, description = ?, image = ?, icon = ?, linkedin_url = ?, email = ?, display_order = ?
+       WHERE id = ?`,
+      [name, role, category || 'Head', branch_title || '', description || '', image || '', icon || '👤', linkedin_url || '', email || '', display_order || 0, req.params.id]
+    );
+
+    res.json({ success: true, message: 'Team member updated.' });
+  } catch (err) {
+    console.error('Error updating team member:', err);
+    res.status(500).json({ success: false, error: 'Failed to update team member.' });
+  }
+});
+
+// Admin: Delete Team Member
+app.delete('/api/admin/team/:id', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`DELETE FROM team_members WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Team member deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete team member.' });
+  }
+});
+
+// Public: Get Gallery Images
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const images = await dbAll(`SELECT * FROM gallery_images ORDER BY display_order ASC, id DESC`);
+    res.json({ success: true, count: images.length, images });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch gallery images.' });
+  }
+});
+
+// Admin: Get Gallery Images
+app.get('/api/admin/gallery', authAdmin, async (req, res) => {
+  try {
+    const images = await dbAll(`SELECT * FROM gallery_images ORDER BY display_order ASC, id DESC`);
+    res.json({ success: true, count: images.length, images });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch gallery images.' });
+  }
+});
+
+// Admin: Add Gallery Image
+app.post('/api/admin/gallery', authAdmin, async (req, res) => {
+  try {
+    const { title, category, image, display_order } = req.body;
+    if (!title || !image) {
+      return res.status(400).json({ success: false, error: 'Title and image are required.' });
+    }
+
+    const result = await dbRun(
+      `INSERT INTO gallery_images (title, category, image, display_order) VALUES (?, ?, ?, ?)`,
+      [title, category || 'General', image, display_order || 0]
+    );
+
+    res.status(201).json({ success: true, message: 'Gallery image added.', id: result.lastID });
+  } catch (err) {
+    console.error('Error adding gallery image:', err);
+    res.status(500).json({ success: false, error: 'Failed to add gallery image.' });
+  }
+});
+
+// Admin: Update Gallery Image
+app.put('/api/admin/gallery/:id', authAdmin, async (req, res) => {
+  try {
+    const { title, category, image, display_order } = req.body;
+    if (!title || !image) {
+      return res.status(400).json({ success: false, error: 'Title and image are required.' });
+    }
+
+    await dbRun(
+      `UPDATE gallery_images SET title = ?, category = ?, image = ?, display_order = ? WHERE id = ?`,
+      [title, category || 'General', image, display_order || 0, req.params.id]
+    );
+
+    res.json({ success: true, message: 'Gallery image updated.' });
+  } catch (err) {
+    console.error('Error updating gallery image:', err);
+    res.status(500).json({ success: false, error: 'Failed to update gallery image.' });
+  }
+});
+
+// Admin: Delete Gallery Image
+app.delete('/api/admin/gallery/:id', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`DELETE FROM gallery_images WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Gallery image deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete gallery image.' });
+  }
+});
+
+// Admin: Delete Event
+app.delete('/api/admin/events/:id', authAdmin, async (req, res) => {
+  try {
+    await dbRun(`DELETE FROM events WHERE id = ?`, [req.params.id]);
+    res.json({ success: true, message: 'Event deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete event.' });
+  }
+});
+
+// SPA Fallback Route for React Router
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  const indexHtml = path.join(__dirname, 'dist', 'index.html');
+  if (fs.existsSync(indexHtml)) {
+    return res.sendFile(indexHtml);
+  }
+  next();
+});
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`====================================================`);
+  console.log(`AAYAM UIT React & Backend Server is running!`);
+  console.log(`URL: http://localhost:${PORT}`);
+  console.log(`React App Routes: /, /events, /team, /gallery, /contact`);
+  console.log(`Auth Routes: /login, /signup`);
+  console.log(`Admin Portal: /admin`);
+  console.log(`====================================================`);
+});

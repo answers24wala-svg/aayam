@@ -1,0 +1,136 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/');
+  };
+
+  const isActive = (path) => location.pathname === path;
+
+  return (
+    <>
+      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="mainNav">
+        <div className="nav-inner">
+          <Link to="/" className="nav-brand">
+            <div className="ku-brand-wrap">
+              <svg className="ku-flame-icon" viewBox="0 0 36 36" fill="none">
+                <path d="M18 2C18 2 26 10 26 17C26 22.5228 22.4183 27 18 27C13.5817 27 10 22.5228 10 17C10 10 18 2 18 2Z" fill="url(#flameGrad1)"/>
+                <path d="M18 8C18 8 22.5 13.5 22.5 18C22.5 21.3137 20.4853 24 18 24C15.5147 24 13.5 21.3137 13.5 18C13.5 13.5 18 8 18 8Z" fill="url(#flameGrad2)"/>
+                <defs>
+                  <linearGradient id="flameGrad1" x1="18" y1="2" x2="18" y2="27" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#C8232C"/>
+                    <stop offset="1" stopColor="#D97706"/>
+                  </linearGradient>
+                  <linearGradient id="flameGrad2" x1="18" y1="8" x2="18" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F59E0B"/>
+                    <stop offset="1" stopColor="#FCD34D"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="ku-text">
+                <span className="ku-title">KARNAVATI</span>
+                <span className="ku-sub">UNIVERSITY</span>
+              </div>
+            </div>
+
+            <div className="nav-divider"></div>
+            <span className="uit-text">UIT</span>
+            <div className="nav-divider"></div>
+
+            <div className="aayam-badge-gold">
+              <span>आयाम</span>
+            </div>
+          </Link>
+
+          <div className="nav-links">
+            <Link to="/" className={isActive('/') ? 'active' : ''}>Home</Link>
+            <Link to="/events" className={isActive('/events') ? 'active' : ''}>Events</Link>
+            <Link to="/team" className={isActive('/team') ? 'active' : ''}>Our Team</Link>
+            <Link to="/gallery" className={isActive('/gallery') ? 'active' : ''}>Gallery</Link>
+            <Link to="/contact" className={isActive('/contact') ? 'active' : ''}>Contact</Link>
+
+            <div className="nav-auth-wrap" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginLeft: '12px' }}>
+              {!user ? (
+                <>
+                  <Link to="/login" className="nav-login-link" style={{ color: 'var(--navy)', fontWeight: 600, fontSize: '13px', textDecoration: 'none', padding: '6px 12px' }}>Log In</Link>
+                  <Link to="/signup" className="btn-primary" style={{ padding: '8px 16px', fontSize: '12px', borderRadius: '20px', textDecoration: 'none' }}>Sign Up</Link>
+                </>
+              ) : user.role === 'admin' ? (
+                <>
+                  <Link to="/admin" style={{ background: 'var(--navy)', color: '#fff', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>👑 Admin Dashboard</Link>
+                  <button onClick={handleLogoutClick} style={{ background: 'none', border: '1px solid #cbd5e1', padding: '5px 10px', borderRadius: '16px', fontSize: '11px', cursor: 'pointer', color: '#64748b' }}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', background: '#f1f5f9', padding: '6px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    🎓 Hi, {user.name ? user.name.split(' ')[0] : 'Student'}
+                  </span>
+                  <button onClick={handleLogoutClick} style={{ background: 'none', border: '1px solid #cbd5e1', padding: '5px 10px', borderRadius: '16px', fontSize: '11px', cursor: 'pointer', color: '#64748b' }}>Logout</button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <button
+            className={`hamburger ${menuOpen ? 'open' : ''}`}
+            id="hamburger"
+            aria-label="Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </nav>
+
+      {/* MOBILE MENU */}
+      <div className={`mobile-menu ${menuOpen ? 'open' : ''}`} id="mobileMenu">
+        <Link to="/" className={isActive('/') ? 'active' : ''}>Home</Link>
+        <Link to="/events" className={isActive('/events') ? 'active' : ''}>Events</Link>
+        <Link to="/team" className={isActive('/team') ? 'active' : ''}>Our Team</Link>
+        <Link to="/gallery" className={isActive('/gallery') ? 'active' : ''}>Gallery</Link>
+        <Link to="/contact" className={isActive('/contact') ? 'active' : ''}>Contact</Link>
+
+        <div class="mobile-auth-section" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {!user ? (
+            <>
+              <Link to="/login" style={{ textAlign: 'center', padding: '10px', border: '1px solid var(--navy)', borderRadius: '8px', color: 'var(--navy)', fontWeight: 600, textDecoration: 'none' }}>Log In</Link>
+              <Link to="/signup" class="btn-primary" style={{ textAlign: 'center', padding: '10px', justifyContent: 'center', textDecoration: 'none' }}>Sign Up</Link>
+            </>
+          ) : user.role === 'admin' ? (
+            <>
+              <Link to="/admin" style={{ display: 'block', textAlign: 'center', padding: '10px', background: 'var(--navy)', color: '#fff', borderRadius: '8px', fontWeight: 700, textDecoration: 'none', marginBottom: '8px' }}>👑 Admin Dashboard</Link>
+              <button onClick={handleLogoutClick} style={{ width: '100%', padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>Logout</button>
+            </>
+          ) : (
+            <>
+              <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 700, color: 'var(--navy)', marginBottom: '8px' }}>🎓 Logged in as {user.name}</div>
+              <button onClick={handleLogoutClick} style={{ width: '100%', padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>Logout</button>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
