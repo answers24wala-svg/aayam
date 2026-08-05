@@ -115,7 +115,7 @@ export default function Home() {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="hero-redesign hero-bg-sketch">
+      <section className="hero-redesign hero-bg-sketch" style={{ backgroundImage: "url('/home_bg.jpg')" }}>
         <div className="hero-overlay"></div>
         <div className="hero-dots-pattern hero-dots-top"></div>
         <div className="hero-dots-pattern hero-dots-bottom"></div>

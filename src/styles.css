@@ -417,7 +417,7 @@ button { cursor: pointer; font-family: inherit; }
    ============================================= */
 .page-hero {
   padding-top: 68px;
-  background-image: url('university_sketch.png');
+  background-image: url('/home_bg.jpg');
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
@@ -853,7 +853,7 @@ button { cursor: pointer; font-family: inherit; }
 /* Hero Section Redesign with Photo Background */
 .hero-redesign {
   position: relative;
-  background-image: url('university_sketch.png');
+  background-image: url('/home_bg.jpg');
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
