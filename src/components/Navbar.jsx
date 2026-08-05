@@ -34,49 +34,40 @@ export default function Navbar() {
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="mainNav">
         <div className="nav-inner">
           <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '16px', textDecoration: 'none' }}>
-            {/* 3rd image: Karnavati University NAAC A+ Logo */}
+            {/* Karnavati University NAAC A+ Logo */}
             <img
               src="/karnavati_logo.png"
               alt="Karnavati University"
               style={{
-                height: '66px',
+                height: '54px',
                 objectFit: 'contain',
-                background: '#ffffff',
-                padding: '6px 14px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+                background: 'transparent'
               }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4, height: '36px' }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '32px' }}></div>
 
-            {/* 2nd image: UIT Logo */}
+            {/* UIT Logo */}
             <img
               src="/uit_logo.png"
               alt="UIT"
               style={{
-                height: '52px',
+                height: '54px',
                 objectFit: 'contain',
-                background: '#ffffff',
-                padding: '5px 12px',
-                borderRadius: '10px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+                background: 'transparent'
               }}
             />
 
-            <div className="nav-divider" style={{ opacity: 0.4, height: '36px' }}></div>
+            <div className="nav-divider" style={{ opacity: 0.4, height: '32px' }}></div>
 
-            {/* 1st image: AAYAM Logo */}
+            {/* AAYAM Logo */}
             <img
               src="/aayam_logo.png"
               alt="AAYAM"
               style={{
-                height: '72px',
-                width: '72px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '3px solid #C5A059',
-                boxShadow: '0 4px 16px rgba(197, 160, 89, 0.5)'
+                height: '54px',
+                objectFit: 'contain',
+                background: 'transparent'
               }}
             />
           </Link>

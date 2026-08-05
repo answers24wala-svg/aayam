@@ -6,19 +6,19 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <div className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: '#ffffff', padding: '8px 16px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+          <div className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', marginBottom: '16px', background: 'transparent' }}>
             {/* Karnavati University Logo */}
-            <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '34px', objectFit: 'contain' }} />
+            <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '42px', objectFit: 'contain', background: 'transparent' }} />
 
-            <div style={{ height: '22px', width: '1px', background: '#cbd5e1' }}></div>
+            <div style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.25)' }}></div>
 
             {/* UIT Logo */}
-            <img src="/uit_logo.png" alt="UIT" style={{ height: '26px', objectFit: 'contain' }} />
+            <img src="/uit_logo.png" alt="UIT" style={{ height: '42px', objectFit: 'contain', background: 'transparent' }} />
 
-            <div style={{ height: '22px', width: '1px', background: '#cbd5e1' }}></div>
+            <div style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.25)' }}></div>
 
             {/* AAYAM Logo */}
-            <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C5A059' }} />
+            <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '42px', objectFit: 'contain', background: 'transparent' }} />
           </div>
           <p>AAYAM UIT Student Committee — Building Leaders, Creating Impact.</p>
           <div className="footer-socials">

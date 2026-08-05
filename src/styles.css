@@ -751,12 +751,10 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 @media (max-width: 900px) {
-  .navbar { height: 86px; padding: 0 18px; }
-  .navbar.scrolled { height: 78px; }
-  .mobile-menu { top: 86px; background: rgba(250,246,240,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-  .nav-brand img[alt="Karnavati University"] { height: 42px !important; padding: 4px 8px !important; }
-  .nav-brand img[alt="UIT"] { height: 32px !important; padding: 3px 6px !important; }
-  .nav-brand img[alt="AAYAM"] { height: 46px !important; width: 46px !important; }
+  .navbar { height: 82px; padding: 0 18px; }
+  .navbar.scrolled { height: 74px; }
+  .mobile-menu { top: 82px; background: rgba(250,246,240,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .nav-brand img { height: 42px !important; background: transparent !important; width: auto !important; border-radius: 0 !important; }
   .nav-brand { gap: 10px !important; }
   .nav-divider { height: 24px !important; }
 
@@ -780,12 +778,10 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 @media (max-width: 640px) {
-  .navbar { height: 76px; padding: 0 12px; }
-  .navbar.scrolled { height: 70px; }
-  .mobile-menu { top: 76px; padding: 16px; }
-  .nav-brand img[alt="Karnavati University"] { height: 34px !important; padding: 3px 6px !important; border-radius: 6px !important; }
-  .nav-brand img[alt="UIT"] { height: 26px !important; padding: 2px 5px !important; border-radius: 5px !important; }
-  .nav-brand img[alt="AAYAM"] { height: 38px !important; width: 38px !important; }
+  .navbar { height: 74px; padding: 0 12px; }
+  .navbar.scrolled { height: 68px; }
+  .mobile-menu { top: 74px; padding: 16px; }
+  .nav-brand img { height: 34px !important; background: transparent !important; width: auto !important; border-radius: 0 !important; }
   .nav-brand { gap: 6px !important; }
   .nav-divider { height: 18px !important; }
 

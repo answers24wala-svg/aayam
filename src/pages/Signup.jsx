@@ -50,12 +50,12 @@ export default function Signup() {
       <div className="auth-bg-overlay"></div>
 
       <header className="auth-header-nav">
-        <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '6px 14px', borderRadius: '12px', textDecoration: 'none' }}>
-          <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '30px', objectFit: 'contain' }} />
-          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
-          <img src="/uit_logo.png" alt="UIT" style={{ height: '24px', objectFit: 'contain' }} />
-          <div style={{ height: '18px', width: '1px', background: '#cbd5e1' }}></div>
-          <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '32px', width: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C5A059' }} />
+        <Link to="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'transparent', textDecoration: 'none' }}>
+          <img src="/karnavati_logo.png" alt="Karnavati University" style={{ height: '36px', objectFit: 'contain', background: 'transparent' }} />
+          <div style={{ height: '20px', width: '1px', background: 'rgba(255,255,255,0.3)' }}></div>
+          <img src="/uit_logo.png" alt="UIT" style={{ height: '36px', objectFit: 'contain', background: 'transparent' }} />
+          <div style={{ height: '20px', width: '1px', background: 'rgba(255,255,255,0.3)' }}></div>
+          <img src="/aayam_logo.png" alt="AAYAM" style={{ height: '36px', objectFit: 'contain', background: 'transparent' }} />
         </Link>
 
         <Link to="/" style={{ color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
