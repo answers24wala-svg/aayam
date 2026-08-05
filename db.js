@@ -202,7 +202,7 @@ const initDb = async () => {
         {
           title: 'INFERNO 3.0',
           subtitle: 'The Battle of Brains',
-          category: 'competition',
+          category: 'technical',
           date_str: '19 March 2026',
           location: 'KU Main Auditorium',
           description: 'Intense coding competitions, robotics challenges, and problem solving hackathons.',
@@ -222,7 +222,7 @@ const initDb = async () => {
         {
           title: 'DATA SCIENCE WORKSHOP',
           subtitle: 'Hands-on Machine Learning',
-          category: 'workshop',
+          category: 'technical',
           date_str: '28 Jan 2026',
           location: 'CS Lab, KU',
           description: 'An interactive workshop covering practical Python ML algorithms, data visualisations, and predictive analytics.',
@@ -232,7 +232,7 @@ const initDb = async () => {
         {
           title: 'RANG 2.0',
           subtitle: 'Annual Cultural Festival',
-          category: 'cultural',
+          category: 'non-technical',
           date_str: '15 Feb 2026',
           location: 'KU Open Air Theater',
           description: 'A vibrant celebration of music, dance, fashion, and artistic expressions by students.',

@@ -310,11 +310,7 @@ export default function EventDetailsForm({ eventData, setEventData, onSubmit, on
                 style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #cbd5e1', borderRadius: '12px', fontSize: '13px', background: '#faf8f5' }}
               >
                 <option value="technical">Technical</option>
-                <option value="cultural">Cultural</option>
-                <option value="sports">Sports</option>
-                <option value="workshop">Workshop</option>
-                <option value="competition">Competition</option>
-                <option value="symposium">Symposium</option>
+                <option value="non-technical">Non-Technical</option>
               </select>
             </div>
 

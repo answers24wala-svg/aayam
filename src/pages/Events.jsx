@@ -18,7 +18,7 @@ const DEFAULT_EVENTS = [
     id: 2,
     title: 'Inferno 3.0',
     subtitle: 'The Battle of Brains',
-    category: 'competition',
+    category: 'technical',
     date_str: '19 March 2026',
     location: 'KU Campus',
     description: 'Intense coding battles, robotics challenges, and problem solving hackathons.',
@@ -40,7 +40,7 @@ const DEFAULT_EVENTS = [
     id: 4,
     title: 'Data Science Workshop',
     subtitle: 'Hands-on Machine Learning',
-    category: 'workshop',
+    category: 'technical',
     date_str: '28 Jan 2026',
     location: 'CS Lab, KU',
     description: 'An interactive workshop covering practical Python ML algorithms, data visualisations, and predictive analytics.',
@@ -51,7 +51,7 @@ const DEFAULT_EVENTS = [
     id: 5,
     title: 'Rang 2.0 — Cultural Festival',
     subtitle: 'Annual Cultural Festival',
-    category: 'cultural',
+    category: 'non-technical',
     date_str: '15 Feb 2026',
     location: 'KU Amphitheater',
     description: 'A vibrant celebration of music, dance, fashion, and artistic expressions by students.',
@@ -62,7 +62,7 @@ const DEFAULT_EVENTS = [
     id: 6,
     title: 'Sports League 2026',
     subtitle: 'Inter-Branch Championship',
-    category: 'sports',
+    category: 'non-technical',
     date_str: '10 April 2026',
     location: 'KU Sports Complex',
     description: 'Inter-departmental athletic leagues and tournaments.',
@@ -222,14 +222,18 @@ export default function Events() {
           </p>
 
           <div className="filter-pill-container" style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['all', 'technical', 'competition', 'workshop', 'cultural', 'sports'].map(cat => (
+            {[
+              { id: 'all', label: 'All Events' },
+              { id: 'technical', label: 'Technical' },
+              { id: 'non-technical', label: 'Non-Technical' }
+            ].map(cat => (
               <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`filter-pill ${filter === cat ? 'active' : ''}`}
-                style={{ textTransform: 'capitalize', cursor: 'pointer' }}
+                key={cat.id}
+                onClick={() => setFilter(cat.id)}
+                className={`filter-pill ${filter === cat.id ? 'active' : ''}`}
+                style={{ cursor: 'pointer', padding: '10px 22px', borderRadius: '30px', fontWeight: 700, fontSize: '13px' }}
               >
-                {cat}
+                {cat.label}
               </button>
             ))}
           </div>
